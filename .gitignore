@@ -1,0 +1,5 @@
+**/.vscode
+**/.devcontainer
+sdkconfig
+sdkconfig.old
+
