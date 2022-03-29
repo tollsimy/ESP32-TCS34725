@@ -135,7 +135,8 @@ typedef struct{
   uint8_t data[2];
 } ESP32_TCS34725;
 
-bool TCS_init(ESP32_TCS34725* TCS);
+esp_err_t TCS_init(ESP32_TCS34725* TCS);
+esp_err_t TCS_delete();
 void TCS_enable(ESP32_TCS34725* TCS);
 void TCS_disable(ESP32_TCS34725* TCS);
 void setInterrupt(ESP32_TCS34725* TCS, bool flag);

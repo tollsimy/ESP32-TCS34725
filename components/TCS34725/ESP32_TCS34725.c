@@ -42,7 +42,7 @@ float powf(const float x, const float y) {
  *
  *  @return True if initialization was successful, otherwise false.
  */
-bool TCS_init(ESP32_TCS34725 *TCS) {
+esp_err_t TCS_init(ESP32_TCS34725 *TCS) {
 
   TCS->_tcs34725Initialised = true;
   TCS->_tcs34725Gain = TCS34725_GAIN_1X;
@@ -73,7 +73,15 @@ bool TCS_init(ESP32_TCS34725 *TCS) {
   /* Note: by default, the device is in power down mode on bootup */
   TCS_enable(TCS);
 
-  return true;
+  return ESP_OK;
+}
+
+/**
+ *  @brief  Delete the device
+ */
+esp_err_t TCS_delete(){
+  ESP_ERROR_CHECK(i2c_driver_delete(I2C_PORT));
+  return ESP_OK;
 }
 
 /**

@@ -17,7 +17,7 @@ void TCS_task(){
         float red, green, blue;
         uint16_t temp, lux;
         ESP32_TCS34725 TCS={0};
-        if(TCS_init(&TCS)){
+        if(TCS_init(&TCS)==ESP_OK){
             ESP_LOGI(TAG, "Init complete!");
         }
         TCS_enable(&TCS);
@@ -28,6 +28,7 @@ void TCS_task(){
         lux=calculateLux(red,green,blue);
         ESP_LOGI(TAG, "RED: %f, GREEN: %f, BLUE: %f", red, green, blue);
         ESP_LOGI(TAG, "Color Temperature: %d, LUX: %d", temp, lux);
+        TCS_delete();
         vTaskDelay(3000/portTICK_PERIOD_MS);
     }
 }
