@@ -18,9 +18,9 @@
 
 #include "driver/i2c.h"
 
-extern uint8_t SDA_PIN;
-extern uint8_t SCL_PIN;
-extern uint8_t I2C_PORT;
+extern uint8_t TCS_SDA_PIN;
+extern uint8_t TCS_SCL_PIN;
+extern uint8_t TCS_I2C_PORT;
 
 #define TCS34725_ADDRESS (0x29)     /**< I2C address **/
 #define TCS34725_COMMAND_BIT (0x80) /**< Command bit **/

@@ -55,7 +55,7 @@ static void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
   ESP_ERROR_CHECK(i2c_cmd_link_delete(TCS->cmd));
   */
  
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
 }
 
 /**
@@ -65,8 +65,8 @@ static void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
  */
 static uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
   uint8_t buffer[1] = {TCS34725_COMMAND_BIT | reg};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
 
   return buffer[0];
 }
@@ -78,8 +78,8 @@ static uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
  */
 static uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg) {
   uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, 0};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
 
   return (((uint16_t)buffer[1]) << 8) | (((uint16_t)buffer[0]) & 0xFF);
 }
@@ -100,15 +100,15 @@ esp_err_t TCS_init(ESP32_TCS34725 *TCS) {
   TCS->_tcs34725IntegrationTime = TCS34725_INTEGRATIONTIME_2_4MS;
 
   TCS->conf.mode = I2C_MODE_MASTER;
-  TCS->conf.sda_io_num = SDA_PIN;
-  TCS->conf.scl_io_num = SCL_PIN;
+  TCS->conf.sda_io_num = TCS_SDA_PIN;
+  TCS->conf.scl_io_num = TCS_SCL_PIN;
   TCS->conf.sda_pullup_en = GPIO_PULLUP_DISABLE;     //disable if you have external pullup
   TCS->conf.scl_pullup_en = GPIO_PULLUP_DISABLE;
   TCS->conf.master.clk_speed = 400000;               //I2C Full Speed
 
-  ESP_ERROR_CHECK(i2c_param_config(I2C_PORT, &(TCS->conf))); //set I2C Config
+  ESP_ERROR_CHECK(i2c_param_config(TCS_I2C_PORT, &(TCS->conf))); //set I2C Config
 
-  ESP_ERROR_CHECK(i2c_driver_install(I2C_PORT, I2C_MODE_MASTER, 0, 0, 0));
+  ESP_ERROR_CHECK(i2c_driver_install(TCS_I2C_PORT, I2C_MODE_MASTER, 0, 0, 0));
 
   /* Make sure we're actually connected */
   uint8_t x = read8(TCS,TCS34725_ID);
@@ -131,7 +131,7 @@ esp_err_t TCS_init(ESP32_TCS34725 *TCS) {
  *  @brief  Delete the device
  */
 esp_err_t TCS_delete(){
-  ESP_ERROR_CHECK(i2c_driver_delete(I2C_PORT));
+  ESP_ERROR_CHECK(i2c_driver_delete(TCS_I2C_PORT));
   return ESP_OK;
 }
 
@@ -196,7 +196,7 @@ void TCS_setIntLimits(ESP32_TCS34725* TCS, uint16_t low, uint16_t high) {
  */
 void TCS_clearInterrupt(ESP32_TCS34725* TCS) {
   uint8_t buffer[1] = {TCS34725_COMMAND_BIT | 0x66};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
 }
 
 /**

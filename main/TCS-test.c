@@ -4,9 +4,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-uint8_t SDA_PIN=18;
-uint8_t SCL_PIN=19;
-uint8_t I2C_PORT=0;
+uint8_t TCS_SDA_PIN=18;
+uint8_t TCS_SCL_PIN=19;
+uint8_t TCS_I2C_PORT=0;
 
 #include "ESP32_TCS34725.h"
 
