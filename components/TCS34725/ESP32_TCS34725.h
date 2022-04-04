@@ -13,8 +13,8 @@
  * 
  */
 
-#ifndef _ESP32_TCS34725_H_
-#define _ESP32_TCS34725_H_
+#ifndef __ESP32_TCS34725_H__
+#define __ESP32_TCS34725_H__
 
 #include "driver/i2c.h"
 
@@ -139,22 +139,19 @@ esp_err_t TCS_init(ESP32_TCS34725* TCS);
 esp_err_t TCS_delete();
 void TCS_enable(ESP32_TCS34725* TCS);
 void TCS_disable(ESP32_TCS34725* TCS);
-void setInterrupt(ESP32_TCS34725* TCS, bool flag);
-void setIntLimits(ESP32_TCS34725* TCS, uint16_t l, uint16_t h);
-void clearInterrupt(ESP32_TCS34725* TCS);
+void TCS_setInterrupt(ESP32_TCS34725* TCS, bool flag);
+void TCS_setIntLimits(ESP32_TCS34725* TCS, uint16_t l, uint16_t h);
+void TCS_clearInterrupt(ESP32_TCS34725* TCS);
 
-void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value);
-uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg);
-uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg);
-void setIntegrationTime(ESP32_TCS34725* TCS, uint8_t it);
-void setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain);
+void TCS_setIntegrationTime(ESP32_TCS34725* TCS, uint8_t it);
+void TCS_setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain);
 
-void getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
-void getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b);
-void getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
-uint16_t calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b);
-uint16_t calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-uint16_t calculateLux(uint16_t r, uint16_t g, uint16_t b);
+void TCS_getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
+void TCS_getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b);
+void TCS_getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
+uint16_t TCS_calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b);
+uint16_t TCS_calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+uint16_t TCS_calculateLux(uint16_t r, uint16_t g, uint16_t b);
 
 
 

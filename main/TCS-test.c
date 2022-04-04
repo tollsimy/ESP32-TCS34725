@@ -21,11 +21,11 @@ void TCS_task(){
             ESP_LOGI(TAG, "Init complete!");
         }
         TCS_enable(&TCS);
-        setGain(&TCS,TCS34725_GAIN_1X);
-        setIntegrationTime(&TCS,TCS34725_INTEGRATIONTIME_50MS);
-        getRGB(&TCS,&red,&green,&blue);
-        temp=calculateColorTemperature(red,green,blue);
-        lux=calculateLux(red,green,blue);
+        TCS_setGain(&TCS,TCS34725_GAIN_1X);
+        TCS_setIntegrationTime(&TCS,TCS34725_INTEGRATIONTIME_50MS);
+        TCS_getRGB(&TCS,&red,&green,&blue);
+        temp=TCS_calculateColorTemperature(red,green,blue);
+        lux=TCS_calculateLux(red,green,blue);
         ESP_LOGI(TAG, "RED: %f, GREEN: %f, BLUE: %f", red, green, blue);
         ESP_LOGI(TAG, "Color Temperature: %d, LUX: %d", temp, lux);
         TCS_delete();

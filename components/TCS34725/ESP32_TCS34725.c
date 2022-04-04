@@ -35,6 +35,57 @@ float powf(const float x, const float y) {
   return (float)(pow((double)x, (double)y));
 }
 
+// READ/WRITE Registers static 
+
+/**
+ *  @brief  Writes a register and an 8 bit value over I2C
+ *  @param  reg
+ *  @param  value
+ */
+static void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
+  uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, value & 0xFF};
+
+  /*
+  TCS->cmd = i2c_cmd_link_create();
+  ESP_ERROR_CHECK(i2c_master_start(TCS->cmd));
+  ESP_ERROR_CHECK(i2c_master_write_byte(TCS->cmd,TCS34725_ADDRESS,true));
+  ESP_ERROR_CHECK(i2c_master_write(buffer,2,true));
+  ESP_ERROR_CHECK(i2c_master_stop(TCS->cmd));
+  ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_PORT,TCS->cmd,1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_cmd_link_delete(TCS->cmd));
+  */
+ 
+  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+}
+
+/**
+ *  @brief  Reads an 8 bit value over I2C
+ *  @param  reg
+ *  @return value
+ */
+static uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
+  uint8_t buffer[1] = {TCS34725_COMMAND_BIT | reg};
+  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+
+  return buffer[0];
+}
+
+/**
+ *  @brief  Reads a 16 bit values over I2C
+ *  @param  reg
+ *  @return value
+ */
+static uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg) {
+  uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, 0};
+  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+
+  return (((uint16_t)buffer[1]) << 8) | (((uint16_t)buffer[0]) & 0xFF);
+}
+
+// Public functions
+
 /**
  *  @brief  Initializes I2C and configures the sensor
  * 
@@ -67,8 +118,8 @@ esp_err_t TCS_init(ESP32_TCS34725 *TCS) {
   TCS->_tcs34725Initialised = true;
 
   /* Set default integration time and gain */
-  setIntegrationTime(TCS, TCS->_tcs34725IntegrationTime);
-  setGain(TCS, TCS->_tcs34725Gain);
+  TCS_setIntegrationTime(TCS, TCS->_tcs34725IntegrationTime);
+  TCS_setGain(TCS, TCS->_tcs34725Gain);
 
   /* Note: by default, the device is in power down mode on bootup */
   TCS_enable(TCS);
@@ -116,7 +167,7 @@ void TCS_disable(ESP32_TCS34725* TCS) {
  *  @param  i
  *          Interrupt (True/False)
  */
-void setInterrupt(ESP32_TCS34725* TCS, bool i) {
+void TCS_setInterrupt(ESP32_TCS34725* TCS, bool i) {
   uint8_t r = read8(TCS,TCS34725_ENABLE);
   if (i) {
     r |= TCS34725_ENABLE_AIEN;
@@ -133,7 +184,7 @@ void setInterrupt(ESP32_TCS34725* TCS, bool i) {
  *  @param  high
  *          High limit
  */
-void setIntLimits(ESP32_TCS34725* TCS, uint16_t low, uint16_t high) {
+void TCS_setIntLimits(ESP32_TCS34725* TCS, uint16_t low, uint16_t high) {
   write8(TCS, 0x04, low & 0xFF);
   write8(TCS, 0x05, low >> 8);
   write8(TCS, 0x06, high & 0xFF);
@@ -143,58 +194,9 @@ void setIntLimits(ESP32_TCS34725* TCS, uint16_t low, uint16_t high) {
 /**
  *  @brief  Clears inerrupt for TCS34725
  */
-void clearInterrupt(ESP32_TCS34725* TCS) {
+void TCS_clearInterrupt(ESP32_TCS34725* TCS) {
   uint8_t buffer[1] = {TCS34725_COMMAND_BIT | 0x66};
   ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-}
-
-// READ/WRITE ETC.
-
-/**
- *  @brief  Writes a register and an 8 bit value over I2C
- *  @param  reg
- *  @param  value
- */
-void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
-  uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, value & 0xFF};
-
-  /*
-  TCS->cmd = i2c_cmd_link_create();
-  ESP_ERROR_CHECK(i2c_master_start(TCS->cmd));
-  ESP_ERROR_CHECK(i2c_master_write_byte(TCS->cmd,TCS34725_ADDRESS,true));
-  ESP_ERROR_CHECK(i2c_master_write(buffer,2,true));
-  ESP_ERROR_CHECK(i2c_master_stop(TCS->cmd));
-  ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_PORT,TCS->cmd,1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_cmd_link_delete(TCS->cmd));
-  */
- 
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
-}
-
-/**
- *  @brief  Reads an 8 bit value over I2C
- *  @param  reg
- *  @return value
- */
-uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
-  uint8_t buffer[1] = {TCS34725_COMMAND_BIT | reg};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-
-  return buffer[0];
-}
-
-/**
- *  @brief  Reads a 16 bit values over I2C
- *  @param  reg
- *  @return value
- */
-uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg) {
-  uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, 0};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
-
-  return (((uint16_t)buffer[1]) << 8) | (((uint16_t)buffer[0]) & 0xFF);
 }
 
 /**
@@ -202,7 +204,7 @@ uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg) {
  *  @param  it
  *          Integration Time
  */
-void setIntegrationTime(ESP32_TCS34725* TCS, uint8_t it) {
+void TCS_setIntegrationTime(ESP32_TCS34725* TCS, uint8_t it) {
   if (!TCS->_tcs34725Initialised)
     TCS_init(TCS);
 
@@ -218,7 +220,7 @@ void setIntegrationTime(ESP32_TCS34725* TCS, uint8_t it) {
  *  @param  gain
  *          Gain (sensitivity to light)
  */
-void setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain) {
+void TCS_setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain) {
   if (!TCS->_tcs34725Initialised)
     TCS_init(TCS);
 
@@ -240,7 +242,7 @@ void setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain) {
  *  @param  *c
  *          Clear channel value
  */
-void getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
+void TCS_getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
   if (!TCS->_tcs34725Initialised)
     TCS_init(TCS);
 
@@ -267,12 +269,12 @@ void getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint
  *  @param  *c
  *          Clear channel value
  */
-void getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
+void TCS_getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
   if (!TCS->_tcs34725Initialised)
     TCS_init(TCS);
 
   TCS_enable(TCS);
-  getRawData(TCS, r, g, b, c);
+  TCS_getRawData(TCS, r, g, b, c);
   TCS_disable(TCS);
 }
 
@@ -285,9 +287,9 @@ void getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *
  *  @param  *b
  *          Blue value normalized to 0-255
  */
-void getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b) {
+void TCS_getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b) {
   uint16_t red, green, blue, clear;
-  getRawData(TCS, &red, &green, &blue, &clear);
+  TCS_getRawData(TCS, &red, &green, &blue, &clear);
   uint32_t sum = clear;
 
   // Avoid divide by zero errors ... if clear = 0 return black
@@ -311,7 +313,7 @@ void getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b) {
  *          Blue value
  *  @return Color temperature in degrees Kelvin
  */
-uint16_t calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
+uint16_t TCS_calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
   float X, Y, Z; /* RGB to XYZ correlation      */
   float xc, yc;  /* Chromaticity co-ordinates   */
   float n;       /* McCamy's formula            */
@@ -357,7 +359,7 @@ uint16_t calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
  *          Clear channel value
  *  @return Color temperature in degrees Kelvin
  */
-uint16_t calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r,
+uint16_t TCS_calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r,
                                                            uint16_t g,
                                                            uint16_t b,
                                                            uint16_t c) {
@@ -447,7 +449,7 @@ uint16_t calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r,
  *          Blue value
  *  @return Lux value
  */
-uint16_t calculateLux(uint16_t r, uint16_t g, uint16_t b) {
+uint16_t TCS_calculateLux(uint16_t r, uint16_t g, uint16_t b) {
   float illuminance;
 
   /* This only uses RGB ... how can we integrate clear or calculate lux */
