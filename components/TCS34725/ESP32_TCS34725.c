@@ -51,11 +51,11 @@ static void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
   ESP_ERROR_CHECK(i2c_master_write_byte(TCS->cmd,TCS34725_ADDRESS,true));
   ESP_ERROR_CHECK(i2c_master_write(buffer,2,true));
   ESP_ERROR_CHECK(i2c_master_stop(TCS->cmd));
-  ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_PORT,TCS->cmd,1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_PORT,TCS->cmd,1000 / portTICK_PERIOD_MS));
   ESP_ERROR_CHECK(i2c_cmd_link_delete(TCS->cmd));
   */
  
-  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_PERIOD_MS));
 }
 
 /**
@@ -65,8 +65,8 @@ static void write8(ESP32_TCS34725* TCS, uint8_t reg, uint32_t value) {
  */
 static uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
   uint8_t buffer[1] = {TCS34725_COMMAND_BIT | reg};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_PERIOD_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_PERIOD_MS));
 
   return buffer[0];
 }
@@ -78,8 +78,8 @@ static uint8_t read8(ESP32_TCS34725* TCS, uint8_t reg) {
  */
 static uint16_t read16(ESP32_TCS34725* TCS, uint8_t reg) {
   uint8_t buffer[2] = {TCS34725_COMMAND_BIT | reg, 0};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
-  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_PERIOD_MS));
+  ESP_ERROR_CHECK(i2c_master_read_from_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 2, 1000 / portTICK_PERIOD_MS));
 
   return (((uint16_t)buffer[1]) << 8) | (((uint16_t)buffer[0]) & 0xFF);
 }
@@ -196,7 +196,7 @@ void TCS_setIntLimits(ESP32_TCS34725* TCS, uint16_t low, uint16_t high) {
  */
 void TCS_clearInterrupt(ESP32_TCS34725* TCS) {
   uint8_t buffer[1] = {TCS34725_COMMAND_BIT | 0x66};
-  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_RATE_MS));
+  ESP_ERROR_CHECK(i2c_master_write_to_device(TCS_I2C_PORT, TCS34725_ADDRESS, buffer, 1, 1000 / portTICK_PERIOD_MS));
 }
 
 /**
