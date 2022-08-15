@@ -18,9 +18,9 @@
 
 #include "driver/i2c.h"
 
-extern uint8_t TCS_SDA_PIN;
-extern uint8_t TCS_SCL_PIN;
-extern uint8_t TCS_I2C_PORT;
+// extern uint8_t TCS_SDA_PIN;
+// extern uint8_t TCS_SCL_PIN;
+// extern uint8_t TCS_I2C_PORT;
 
 #define TCS34725_ADDRESS (0x29)     /**< I2C address **/
 #define TCS34725_COMMAND_BIT (0x80) /**< Command bit **/
@@ -128,15 +128,14 @@ typedef enum {
  *          TCS34725 Color Sensor
  */
 typedef struct{
-  i2c_config_t conf;
+  uint8_t i2c_port;
   bool _tcs34725Initialised;
   tcs34725Gain_t _tcs34725Gain;
   uint8_t _tcs34725IntegrationTime;
   uint8_t data[2];
 } ESP32_TCS34725;
 
-esp_err_t TCS_init(ESP32_TCS34725* TCS);
-esp_err_t TCS_delete();
+esp_err_t TCS_init(ESP32_TCS34725* TCS, uint8_t i2c_port);
 void TCS_enable(ESP32_TCS34725* TCS);
 void TCS_disable(ESP32_TCS34725* TCS);
 void TCS_setInterrupt(ESP32_TCS34725* TCS, bool flag);
@@ -149,9 +148,10 @@ void TCS_setGain(ESP32_TCS34725* TCS, tcs34725Gain_t gain);
 void TCS_getRawData(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
 void TCS_getRGB(ESP32_TCS34725* TCS, float *r, float *g, float *b);
 void TCS_getRawDataOneShot(ESP32_TCS34725* TCS, uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
-uint16_t TCS_calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b);
 uint16_t TCS_calculateColorTemperature_dn40(ESP32_TCS34725* TCS, uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-uint16_t TCS_calculateLux(uint16_t r, uint16_t g, uint16_t b);
+
+uint16_t calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b);
+uint16_t calculateLux(uint16_t r, uint16_t g, uint16_t b);
 
 
 
